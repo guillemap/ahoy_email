@@ -19,5 +19,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "actionmailer", ">= 7.1"
   spec.add_dependency "addressable", ">= 2.8"
   spec.add_dependency "nokogiri", ">= 1.15"
-  spec.add_dependency "safely_block", ">= 0.5"
+  # spec.add_dependency "safely_block", ">= 0.5"
+  spec.add_dependency "safely_block", ">= 0.4.1"
 end
