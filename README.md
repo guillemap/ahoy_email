@@ -25,6 +25,7 @@ There are three main features, which can be used independently:
 - [Message history](#message-history)
 - [UTM tagging](#utm-tagging)
 - [Click analytics](#click-analytics)
+- [Open analytics](#open-analytics)
 
 ## Message History
 
@@ -324,6 +325,75 @@ Get stats for a campaign
 
 ```ruby
 AhoyEmail.stats("my-campaign")
+```
+
+## Click Analytics
+
+You can track click-through rate to see how well campaigns are performing. Stats can be stored in your database, Redis, or any other data store.
+
+#### Database
+
+Run:
+
+```sh
+rails generate ahoy:opens
+rails db:migrate
+```
+
+And create `config/initializers/ahoy_email.rb` with:
+
+```ruby
+AhoyEmail.subscribers << AhoyEmail::DatabaseSubscriber
+AhoyEmail.api = true
+```
+
+#### Redis
+
+Add this line to your application’s Gemfile:
+
+```ruby
+gem "redis"
+```
+
+And create `config/initializers/ahoy_email.rb` with:
+
+```ruby
+# pass your Redis client if you already have one
+AhoyEmail.subscribers << AhoyEmail::RedisSubscriber.new(redis: Redis.new)
+AhoyEmail.api = true
+```
+
+#### Other
+
+Create `config/initializers/ahoy_email.rb` with:
+
+```ruby
+class EmailSubscriber
+  def track_send(data)
+    # your code
+  end
+
+  def track_open(data)
+    # your code
+  end
+
+  def stats(campaign)
+    # optional, for AhoyEmail.stats
+  end
+end
+
+AhoyEmail.subscribers << EmailSubscriber
+AhoyEmail.api = true
+````
+
+### Usage
+
+Add to mailers you want to track
+
+```ruby
+class CouponMailer < ApplicationMailer
+  track_opens campaign: "my-campaign"
+end
 ```
 
 ## Upgrading

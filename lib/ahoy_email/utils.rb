@@ -3,7 +3,8 @@ module AhoyEmail
     OPTION_KEYS = {
       message: %i(message mailer user extra),
       utm_params: %i(utm_source utm_medium utm_term utm_content utm_campaign html5),
-      click: %i(campaign url_options unsubscribe_links html5)
+      click: %i(campaign url_options unsubscribe_links html5),
+      open: %i(campaign)
     }
 
     class << self

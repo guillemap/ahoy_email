@@ -50,6 +50,9 @@ module AhoyEmail
     url_options: {},
     unsubscribe_links: false,
 
+    # open analytics
+    open: false,
+
     # utm params and click analytics
     html5: nil
   }

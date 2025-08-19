@@ -5,8 +5,20 @@ module Ahoy
     skip_after_action(*filters, raise: false)
     skip_around_action(*filters, raise: false)
 
-    # legacy
     def open
+      token = params[:id].to_s
+      campaign = params[:c].to_s
+      signature = params[:s].to_s
+
+      if AhoyEmail::Utils.signature_verified?(legacy: false, token: token, campaign: campaign, url: '', signature: signature)
+        data = {}
+        data[:campaign] = campaign
+        data[:token] = token
+        data[:url] = ''
+        data[:controller] = self
+        AhoyEmail::Utils.publish(:open, data)
+      end
+
       send_data Base64.decode64("R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="), type: "image/gif", disposition: "inline"
     end
 

@@ -16,6 +16,11 @@ module AhoyEmail
         set_ahoy_options(options, :utm_params)
       end
 
+      def track_opens(**options)
+        raise ArgumentError, "missing keyword: :campaign" unless options.key?(:campaign)
+        set_ahoy_options(options, :open)
+      end
+
       def track_clicks(**options)
         raise ArgumentError, "missing keyword: :campaign" unless options.key?(:campaign)
         set_ahoy_options(options, :click)
@@ -49,8 +54,9 @@ module AhoyEmail
         call_ahoy_options(options, :message)
         call_ahoy_options(options, :utm_params)
         call_ahoy_options(options, :click)
+        call_ahoy_options(options, :open)
 
-        if options[:message] || options[:utm_params] || options[:click]
+        if options[:message] || options[:utm_params] || options[:click] || options[:open]
           AhoyEmail::Processor.new(self, options).perform
         end
       end

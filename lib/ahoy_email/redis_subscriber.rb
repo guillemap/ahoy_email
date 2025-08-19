@@ -15,6 +15,13 @@ module AhoyEmail
       end
     end
 
+    def track_open(event)
+      campaign_prefix = campaign_key(event[:campaign])
+      pipelined do |pipeline|
+        pipeline.pfadd("#{campaign_prefix}:opens", event[:token])
+      end
+    end
+
     def track_click(event)
       campaign_prefix = campaign_key(event[:campaign])
       pipelined do |pipeline|
@@ -60,19 +67,23 @@ module AhoyEmail
       sends = nil
       clicks = nil
       unique_clicks = nil
+      opens = nil
 
       campaign_prefix = campaign_key(campaign)
       pipelined do |pipeline|
         sends = pipeline.get("#{campaign_prefix}:sends")
         clicks = pipeline.get("#{campaign_prefix}:clicks")
         unique_clicks = pipeline.pfcount("#{campaign_prefix}:unique_clicks")
+        opens = pipeline.pfcount("#{campaign_prefix}:opens")
       end
 
       {
         sends: sends.value.to_i,
         clicks: clicks.value.to_i,
         unique_clicks: unique_clicks.value,
-        ctr: 100 * unique_clicks.value / sends.value.to_f
+        ctr: 100 * unique_clicks.value / sends.value.to_f,
+        opens: opens.value,
+        open_rate: 100 * opens.value / sends.value.to_f
       }
     end
 

@@ -4,12 +4,23 @@ module AhoyEmail
       # use has_history to store on Ahoy::Messages
     end
 
+    def track_open(event)
+      Ahoy::Open.find_or_create_by!(campaign: event[:campaign], token: event[:token])
+    end
+
     def track_click(event)
       Ahoy::Click.create!(campaign: event[:campaign], token: event[:token])
     end
 
     def stats(campaign)
       sends = Ahoy::Message.where(campaign: campaign).count
+
+      if defined?(ActiveRecord) && Ahoy::Open < ActiveRecord::Base
+        result = Ahoy::Open.where(campaign: campaign).select("COUNT(*) AS opens, COUNT(DISTINCT token) AS unique_opens").to_a[0]
+        opens = result.opens
+      else
+        opens = Ahoy::Open.where(campaign: campaign).count
+      end
 
       if defined?(ActiveRecord) && Ahoy::Click < ActiveRecord::Base
         result = Ahoy::Click.where(campaign: campaign).select("COUNT(*) AS clicks, COUNT(DISTINCT token) AS unique_clicks").to_a[0]
@@ -27,6 +38,8 @@ module AhoyEmail
           clicks: clicks,
           unique_clicks: unique_clicks,
           ctr: 100 * unique_clicks / sends.to_f
+          opens: opens,
+          open_rate: 100 * opens / stats_result[:sends].to_f
         }
       end
     end

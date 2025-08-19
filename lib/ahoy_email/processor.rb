@@ -13,6 +13,7 @@ module AhoyEmail
     end
 
     def perform
+      track_open if options[:open]
       track_links if options[:utm_params] || options[:click]
       track_message if options[:message]
       message.ahoy_options = options
@@ -35,6 +36,11 @@ module AhoyEmail
         user: options[:user]
       }
 
+      if options[:open]
+        data[:token] = token if AhoyEmail.save_token
+        data[:campaign] = campaign
+      end
+
       if options[:click]
         data[:token] = token if AhoyEmail.save_token
         data[:campaign] = campaign
@@ -47,6 +53,33 @@ module AhoyEmail
       end
 
       mailer.message.ahoy_data = data
+    end
+
+    def track_open
+      if html_part?
+        part = message.html_part || message
+        raw_source = part.body.raw_source
+        signature = Utils.signature(token: token, campaign: campaign, url: '')
+
+        regex = /<\/body>/i
+        url =
+          url_for(
+            controller: "ahoy/messages",
+            action: "open",
+            id: token,
+            c: campaign,
+            s: signature,
+            format: "gif"
+          )
+        pixel = ActionController::Base.helpers.image_tag(url, size: "1x1", alt: "")
+
+        # try to add before body tag
+        if raw_source.match(regex)
+          part.body = raw_source.gsub(regex, "#{pixel}\\0")
+        else
+          part.body = raw_source + pixel
+        end
+      end
     end
 
     def track_links
