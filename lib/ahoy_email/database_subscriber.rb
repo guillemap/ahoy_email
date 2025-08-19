@@ -37,9 +37,9 @@ module AhoyEmail
           sends: sends,
           clicks: clicks,
           unique_clicks: unique_clicks,
-          ctr: 100 * unique_clicks / sends.to_f
+          ctr: 100 * unique_clicks / sends.to_f,
           opens: opens,
-          open_rate: 100 * opens / stats_result[:sends].to_f
+          open_rate: 100 * opens / sends.to_f
         }
       end
     end
